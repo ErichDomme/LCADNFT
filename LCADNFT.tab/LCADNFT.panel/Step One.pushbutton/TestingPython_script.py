@@ -1,4 +1,5 @@
 # Import necessary Revit API classes
+import json
 from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Wall
 
 # Access the current Revit document
@@ -62,22 +63,29 @@ for element in (
                         "transparency": transparency,
                     }
 
-print("-" * 60)
-print(
-    "{:<30} {:<10} {:<10} {:<10}".format(
-        "Material", "Color", "Transparency", "Shininess"
-    )
-)
-print("-" * 60)
-for material, properties in material_data.items():
-    color = properties["color"] if properties["color"] != "N/A" else "N/A"
-    transparency = (
-        properties["transparency"] if properties["transparency"] != "N/A" else "N/A"
-    )
-    shininess = properties["shininess"] if properties["shininess"] != "N/A" else "N/A"
-    print(
-        "{:<30} {:<10} {:<10} {:<10}".format(
-            material, str(color), str(transparency), str(shininess)
-        )
-    )
-print("-" * 60)
+# Convert the material data to a JSON string with indentation
+json_output = json.dumps(material_data, indent=4)
+
+# Print the JSON formatted data
+print(json_output)
+
+
+# print("-" * 60)
+# print(
+#     "{:<30} {:<10} {:<10} {:<10}".format(
+#         "Material", "Color", "Transparency", "Shininess"
+#     )
+# )
+# print("-" * 60)
+# for material, properties in material_data.items():
+#     color = properties["color"] if properties["color"] != "N/A" else "N/A"
+#     transparency = (
+#         properties["transparency"] if properties["transparency"] != "N/A" else "N/A"
+#     )
+#     shininess = properties["shininess"] if properties["shininess"] != "N/A" else "N/A"
+#     print(
+#         "{:<30} {:<10} {:<10} {:<10}".format(
+#             material, str(color), str(transparency), str(shininess)
+#         )
+#     )
+# print("-" * 60)
