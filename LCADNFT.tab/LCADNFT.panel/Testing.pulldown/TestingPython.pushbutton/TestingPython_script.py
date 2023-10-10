@@ -1,19 +1,20 @@
 import clr
+clr.AddReference("System")
 from System import Uri
-from System.Net.Http import HttpClient
+from System.Net import WebClient
 import json
 
 def get_ethereum_price():
-    client = HttpClient()
+    client = WebClient()
     url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-    response = client.GetStringAsync(Uri(url)).Result
+    response = client.DownloadString(Uri(url))
     data = json.loads(response)
     return data['ethereum']['usd']
 
 def get_gas_price():
-    client = HttpClient()
+    client = WebClient()
     url = "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice&apikey=23FFET6VUG68K6YVED9RF6P79BAU8KV4ZV"
-    response = client.GetStringAsync(Uri(url)).Result
+    response = client.DownloadString(Uri(url))
     data = json.loads(response)
     gas_price_wei = int(data['result'], 16)
     gas_price_gwei = gas_price_wei / 1e9
