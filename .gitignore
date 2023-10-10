@@ -2,3 +2,13 @@ LCADNFT.tab/Tests.panel
 .idea/
 *.xlsx
 LCADNFT.tab/Dev.panel/
+LCADNFT.tab/LCADNFT.panel/Dimension.pulldown
+LCADNFT.tab/LCADNFT.panel/Excel.pulldown
+LCADNFT.tab/LCADNFT.panel/Generate.pulldown
+LCADNFT.tab/LCADNFT.panel/Parameter.pulldown
+LCADNFT.tab/LCADNFT.panel/Purge.pulldown
+LCADNFT.tab/LCADNFT.panel/RoomBook.pulldown
+LCADNFT.tab/LCADNFT.panel/Selection.pulldown
+LCADNFT.tab/LCADNFT.panel/Sheets.pulldown
+LCADNFT.tab/LCADNFT.panel/Tag.pulldown
+LCADNFT.tab/LCADNFT.panel/Warning.pulldown
