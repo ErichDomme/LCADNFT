@@ -37,11 +37,19 @@ for element in (
                     appearance_asset = material.AppearanceAssetId
                     if appearance_asset.IntegerValue > 0:
                         appearance_asset_element = doc.GetElement(appearance_asset)
-                        shininess = appearance_asset_element.GetSingleConnectedAsset(
-                            "generic_shininess"
+
+                        # Navigate through the appearance properties
+                        asset = appearance_asset_element.GetRenderingAsset()
+                        shininess_property = asset.FindByName("generic_shininess")
+                        transparency_property = asset.FindByName("generic_transparency")
+
+                        shininess = (
+                            shininess_property.Value if shininess_property else "N/A"
                         )
-                        transparency = appearance_asset_element.GetSingleConnectedAsset(
-                            "generic_transparency"
+                        transparency = (
+                            transparency_property.Value
+                            if transparency_property
+                            else "N/A"
                         )
                     else:
                         shininess = "N/A"
