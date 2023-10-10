@@ -1,9 +1,0 @@
-context:
-  - doc-project
-  - selection
-
-title: Isolate Panels
-
-tooltip: Isolate Panels from Facade. Just select an elemenet before, to define your current view and run this tool afterwards.
-
-author: Erich Domme
