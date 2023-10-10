@@ -23,13 +23,35 @@ for element in (
                 material = doc.GetElement(material_id)
 
                 if material:
-                    # Extract desired properties (e.g., name, color, texture, etc.)
+                    # Extract desired properties
                     material_name = material.Name
-                    # ... extract other properties as needed
+
+                    # Extract color
+                    color = material.Color
+                    if color:
+                        color_value = (color.Red, color.Green, color.Blue)
+                    else:
+                        color_value = "N/A"
+
+                    # Extract shininess and transparency
+                    appearance_asset = material.AppearanceAssetId
+                    if appearance_asset.IntegerValue > 0:
+                        appearance_asset_element = doc.GetElement(appearance_asset)
+                        shininess = appearance_asset_element.GetSingleConnectedAsset(
+                            "generic_shininess"
+                        )
+                        transparency = appearance_asset_element.GetSingleConnectedAsset(
+                            "generic_transparency"
+                        )
+                    else:
+                        shininess = "N/A"
+                        transparency = "N/A"
 
                     # Store the data in the dictionary
                     material_data[material_name] = {
-                        # ... store properties
+                        "color": color_value,
+                        "shininess": shininess,
+                        "transparency": transparency,
                     }
 
 # Print or return the material_data for further processing
