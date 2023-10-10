@@ -63,46 +63,23 @@ for element in (
                         "transparency": transparency,
                     }
 
-# Custom serialization function
-def json_serializable(item):
-    if isinstance(item, int):
-        return str(item)
-    return item
 
-
-# Convert the material data to be JSON serializable using the custom function
-serializable_data = {}
+print("-" * 60)
+print(
+    "{:<30} {:<10} {:<10} {:<10}".format(
+        "Material", "Color", "Transparency", "Shininess"
+    )
+)
+print("-" * 60)
 for material, properties in material_data.items():
-    serializable_data[material] = {}
-    for prop, value in properties.items():
-        if isinstance(value, tuple):  # Convert tuple to list
-            serializable_data[material][prop] = [json_serializable(v) for v in value]
-        else:
-            serializable_data[material][prop] = json_serializable(value)
-
-# Convert the serializable data to a JSON string with indentation
-json_output = json.dumps(serializable_data, indent=4)
-
-# Print the JSON formatted data
-print(json_output)
-
-
-# print("-" * 60)
-# print(
-#     "{:<30} {:<10} {:<10} {:<10}".format(
-#         "Material", "Color", "Transparency", "Shininess"
-#     )
-# )
-# print("-" * 60)
-# for material, properties in material_data.items():
-#     color = properties["color"] if properties["color"] != "N/A" else "N/A"
-#     transparency = (
-#         properties["transparency"] if properties["transparency"] != "N/A" else "N/A"
-#     )
-#     shininess = properties["shininess"] if properties["shininess"] != "N/A" else "N/A"
-#     print(
-#         "{:<30} {:<10} {:<10} {:<10}".format(
-#             material, str(color), str(transparency), str(shininess)
-#         )
-#     )
-# print("-" * 60)
+    color = properties["color"] if properties["color"] != "N/A" else "N/A"
+    transparency = (
+        properties["transparency"] if properties["transparency"] != "N/A" else "N/A"
+    )
+    shininess = properties["shininess"] if properties["shininess"] != "N/A" else "N/A"
+    print(
+        "{:<30} {:<10} {:<10} {:<10}".format(
+            material, str(color), str(transparency), str(shininess)
+        )
+    )
+print("-" * 60)
