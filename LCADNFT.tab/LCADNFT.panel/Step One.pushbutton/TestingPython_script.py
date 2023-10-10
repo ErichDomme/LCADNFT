@@ -1,5 +1,5 @@
 # Import necessary Revit API classes
-from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory
+from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory, Wall
 
 # Access the current Revit document
 doc = __revit__.ActiveUIDocument.Document
@@ -13,21 +13,24 @@ for element in (
     .OfCategory(BuiltInCategory.OST_Walls)
     .WhereElementIsNotElementType()
 ):  # Example for walls
-    # Get the material for the element
-    material = element.Material
-    if material:
-        # Extract desired properties (e.g., name, color, texture, etc.)
-        material_name = material.Name
-        material_color = (
-            material.Color
-        )  # This might need further refinement to access the color property correctly
-        # ... extract other properties as needed
+    if isinstance(element, Wall):  # Check if the element is a Wall
+        wall_type = element.WallType
+        compound_structure = wall_type.GetCompoundStructure()
 
-        # Store the data in the dictionary
-        material_data[material_name] = {
-            "color": material_color,
-            # ... store other properties
-        }
+        if compound_structure:  # Check if the wall has a compound structure
+            for layer in compound_structure.GetLayers():
+                material_id = layer.MaterialId
+                material = doc.GetElement(material_id)
+
+                if material:
+                    # Extract desired properties (e.g., name, color, texture, etc.)
+                    material_name = material.Name
+                    # ... extract other properties as needed
+
+                    # Store the data in the dictionary
+                    material_data[material_name] = {
+                        # ... store properties
+                    }
 
 # Print or return the material_data for further processing
 print(material_data)
