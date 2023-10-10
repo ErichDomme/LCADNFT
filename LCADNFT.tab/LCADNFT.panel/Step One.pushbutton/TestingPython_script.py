@@ -63,15 +63,22 @@ for element in (
                         "transparency": transparency,
                     }
 
-# Convert the material data to be JSON serializable
+# Custom serialization function
+def json_serializable(item):
+    if isinstance(item, int):
+        return str(item)
+    return item
+
+
+# Convert the material data to be JSON serializable using the custom function
 serializable_data = {}
 for material, properties in material_data.items():
     serializable_data[material] = {}
     for prop, value in properties.items():
         if isinstance(value, tuple):  # Convert tuple to list
-            serializable_data[material][prop] = list(value)
+            serializable_data[material][prop] = [json_serializable(v) for v in value]
         else:
-            serializable_data[material][prop] = value
+            serializable_data[material][prop] = json_serializable(value)
 
 # Convert the serializable data to a JSON string with indentation
 json_output = json.dumps(serializable_data, indent=4)
