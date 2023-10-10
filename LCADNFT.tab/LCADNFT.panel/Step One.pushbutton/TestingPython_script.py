@@ -1,3 +1,6 @@
+# Import necessary Revit API classes
+from Autodesk.Revit.DB import FilteredElementCollector, BuiltInCategory
+
 # Access the current Revit document
 doc = __revit__.ActiveUIDocument.Document
 
@@ -5,15 +8,19 @@ doc = __revit__.ActiveUIDocument.Document
 material_data = {}
 
 # Traverse through building elements
-for element in FilteredElementCollector(doc).OfCategory(
-    BuiltInCategory.OST_Walls
+for element in (
+    FilteredElementCollector(doc)
+    .OfCategory(BuiltInCategory.OST_Walls)
+    .WhereElementIsNotElementType()
 ):  # Example for walls
     # Get the material for the element
     material = element.Material
     if material:
         # Extract desired properties (e.g., name, color, texture, etc.)
         material_name = material.Name
-        material_color = material.Color
+        material_color = (
+            material.Color
+        )  # This might need further refinement to access the color property correctly
         # ... extract other properties as needed
 
         # Store the data in the dictionary
