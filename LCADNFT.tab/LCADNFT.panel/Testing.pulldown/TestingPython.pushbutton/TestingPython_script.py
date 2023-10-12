@@ -11,9 +11,13 @@ from System.Net import WebClient
 def get_ethereum_info():
     API_KEY = "23FFET6VUG68K6YVED9RF6P79BAU8KV4ZV"
     ETH_PRICE_URL = (
-        f"https://api.etherscan.io/api?module=stats&action=ethprice&apikey={API_KEY}"
+        "https://api.etherscan.io/api?module=stats&action=ethprice&apikey={}".format(
+            API_KEY
+        )
     )
-    GAS_PRICE_URL = f"https://api.etherscan.io/api?module=proxy&action=eth_gasPrice&apikey={API_KEY}"
+    GAS_PRICE_URL = "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice&apikey={}".format(
+        API_KEY
+    )
 
     with WebClient() as client:
         eth_price_response = json.loads(client.DownloadString(ETH_PRICE_URL))
@@ -30,5 +34,5 @@ def get_ethereum_info():
 eth_price, gas_price = get_ethereum_info()
 
 # Display the results
-message = f"Ethereum Price: ${eth_price}\nGas Price: {gas_price} Gwei"
+message = "Ethereum Price: ${}\nGas Price: {} Gwei".format(eth_price, gas_price)
 forms.alert(message, title="Ethereum Info", ok=True, warn_icon=True)
