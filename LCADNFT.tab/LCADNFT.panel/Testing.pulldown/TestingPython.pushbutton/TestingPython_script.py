@@ -1,5 +1,11 @@
+# API_KEY = "23FFET6VUG68K6YVED9RF6P79BAU8KV4ZV"
+
 from pyrevit import forms
-import requests
+import clr
+import json
+
+clr.AddReference("System")
+from System.Net import WebClient
 
 # Define function to fetch Ethereum info
 def get_ethereum_info():
@@ -9,8 +15,9 @@ def get_ethereum_info():
     )
     GAS_PRICE_URL = f"https://api.etherscan.io/api?module=proxy&action=eth_gasPrice&apikey={API_KEY}"
 
-    eth_price_response = requests.get(ETH_PRICE_URL).json()
-    gas_price_response = requests.get(GAS_PRICE_URL).json()
+    with WebClient() as client:
+        eth_price_response = json.loads(client.DownloadString(ETH_PRICE_URL))
+        gas_price_response = json.loads(client.DownloadString(GAS_PRICE_URL))
 
     eth_price = float(eth_price_response["result"]["ethusd"])
     gas_price_wei = int(gas_price_response["result"], 16)  # Convert hex to int
