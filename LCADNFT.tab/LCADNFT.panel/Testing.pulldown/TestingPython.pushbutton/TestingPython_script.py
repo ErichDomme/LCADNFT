@@ -1,5 +1,10 @@
 # API_KEY = "23FFET6VUG68K6YVED9RF6P79BAU8KV4ZV"
 
+import sys
+
+print(sys.path)
+
+"""
 from pyrevit import forms
 import clr
 import json
@@ -37,3 +42,4 @@ eth_price, gas_price = get_ethereum_info()
 # Display the results
 message = "Ethereum Price: ${}\nGas Price: {} Gwei".format(eth_price, gas_price)
 forms.alert(message, title="Ethereum Info", ok=True, warn_icon=True)
+"""
