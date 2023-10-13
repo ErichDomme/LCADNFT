@@ -3,7 +3,7 @@
 from pyrevit import forms
 import clr
 import json
-from config import ETHERSCAN_API_KEY
+from config.api_keys import ETHERSCAN_API_KEY
 
 clr.AddReference("System")
 from System.Net import WebClient
