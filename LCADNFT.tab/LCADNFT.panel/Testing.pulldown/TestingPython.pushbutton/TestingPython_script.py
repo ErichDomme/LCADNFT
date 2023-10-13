@@ -3,13 +3,14 @@
 from pyrevit import forms
 import clr
 import json
+from config import ETHERSCAN_API_KEY
 
 clr.AddReference("System")
 from System.Net import WebClient
 
 # Define function to fetch Ethereum info
 def get_ethereum_info():
-    API_KEY = "23FFET6VUG68K6YVED9RF6P79BAU8KV4ZV"
+    API_KEY = ETHERSCAN_API_KEY
     ETH_PRICE_URL = (
         "https://api.etherscan.io/api?module=stats&action=ethprice&apikey={}".format(
             API_KEY

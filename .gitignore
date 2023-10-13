@@ -2,3 +2,4 @@ LCADNFT.tab/Tests.panel
 .idea/
 *.xlsx
 LCADNFT.tab/Dev.panel/
+config/api_keys.py
