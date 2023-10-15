@@ -45,7 +45,7 @@ for element in (
 
 # Print the material data with volume and area
 for material, data in material_data.items():
-    print(f"Material: {material}")
-    print(f"Volume: {data['volume']} m³")
-    print(f"Area: {data['area']} m²")
+    print("Material: {}".format(material))
+    print("Volume: {} m³".format(data["volume"]))
+    print("Area: {} m²".format(data["area"]))
     print("-----")
