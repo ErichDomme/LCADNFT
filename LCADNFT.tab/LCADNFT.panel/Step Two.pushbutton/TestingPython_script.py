@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # Import necessary Revit API classes
 from Autodesk.Revit.DB import (
     FilteredElementCollector,
