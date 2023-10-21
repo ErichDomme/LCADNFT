@@ -1,12 +1,11 @@
-# Import necessary .NET assemblies
 import clr
 
 clr.AddReference("RevitAPI")
 clr.AddReference("RevitAPIUI")
 clr.AddReference("System.Windows.Forms")
 
-from Autodesk.Revit.DB import *
-from Autodesk.Revit.UI import *
+from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
+from Autodesk.Revit.UI import TaskDialog
 from System.Windows.Forms import FolderBrowserDialog, DialogResult
 
 # Function to export IFC
@@ -27,9 +26,13 @@ def main():
         # Export IFC
         try:
             active_doc = __revit__.ActiveUIDocument.Document
-            export_to_ifc(
-                doc=active_doc, export_folder=export_folder, filename=filename
-            )
+            # Start a transaction
+            with Transaction(active_doc, "IFC Export") as t:
+                t.Start()
+                export_to_ifc(
+                    doc=active_doc, export_folder=export_folder, filename=filename
+                )
+                t.Commit()
             TaskDialog.Show("Success", "IFC Exported Successfully!")
         except Exception as e:
             TaskDialog.Show("Error", "Error exporting IFC: {}".format(str(e)))
