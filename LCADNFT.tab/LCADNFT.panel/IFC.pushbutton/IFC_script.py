@@ -11,9 +11,6 @@ clr.AddReference("RevitAPIUI")
 from Autodesk.Revit.DB import *
 from Autodesk.Revit.UI import TaskDialog
 
-# Import pyRevit libraries
-from pyrevit import script
-
 # 1. Generate IFC File
 def export_ifc_file(doc):
     # Define the IFC options
@@ -49,20 +46,9 @@ def upload_to_ipfs(file_path):
 
 # 3. Display hash and copy to clipboard
 def display_hash_and_copy(hash_code):
-    # Using pyRevit's forms to display a dialog box
     message = "File Uploaded Successfully!\n\nIPFS Hash: " + hash_code
-    result = script.forms.alert(
-        message,
-        ok=False,
-        yes=True,
-        no=True,
-        yes_text="Copy to Clipboard",
-        no_text="Close",
-    )
-
-    if result == "Yes":
-        script.clipboard.copy(hash_code)
-        TaskDialog.Show("Success", "Hash copied to clipboard!")
+    TaskDialog.Show("Success", message)
+    System.Windows.Forms.Clipboard.SetText(hash_code)
 
 
 def main():
