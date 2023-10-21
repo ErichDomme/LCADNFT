@@ -1,60 +1,59 @@
+# Import necessary modules
 import clr
+import ipfshttpclient
 
-clr.AddReference("RevitAPI")
-clr.AddReference("RevitAPIUI")
-from Autodesk.Revit.DB import *
-from Autodesk.Revit.DB.Architecture import *
-from Autodesk.Revit.UI import *
+# Import Revit API
+clr.AddReference('RevitAPI')
+clr.AddReference('RevitAPIUI')
+from Autodesk.Revit.DB import Document, ExporterIFCUtils, IFCExportOptions
+from Autodesk.Revit.DB.Architecture import RoomFilter
+from Autodesk.Revit.UI import TaskDialog
+import System.Windows.Forms as Forms
 
-import System
-from System.Collections.Generic import List
-from System.Windows.Forms import FolderBrowserDialog
-
-uidoc = __revit__.ActiveUIDocument
-doc = __revit__.ActiveUIDocument.Document
-
-
+# Functions
 def select_directory():
     """
     Allows the user to select a directory and returns the selected path.
     Returns None if no path was selected.
     """
-    dialog = FolderBrowserDialog()
+    dialog = Forms.FolderBrowserDialog()
     dialog.Description = "Select a Folder"
     dialog.ShowNewFolderButton = True
-
-    if dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK:
+    
+    if dialog.ShowDialog() == Forms.DialogResult.OK:
         return dialog.SelectedPath
     return None
 
-
 def get_ifc_options():
-    # Example placeholder for IFC options setup
+    """Set IFC export options."""
     options = IFCExportOptions()
-    # options.SpaceBoundaries = 2  # This was previously causing an error
+    options.FileVersion = IFCExportFileVersion.IFC4
+    options.SpaceBoundaryLevel = 0
+    options.ExportBaseQuantities = True
     return options
 
-
-def export_ifc_file(doc, options, selected_path):
-    if not selected_path:
-        raise Exception("No directory selected for export.")
-
-    # Construct the full file path using the selected directory
-    file_path = System.IO.Path.Combine(selected_path, "ExportedIFC.ifc")
-
-    # Execute export (replace with your export logic if different)
-    doc.Export(selected_path, file_path, options)
-
-
-def main():
-    selected_path = select_directory()
-
-    if selected_path:
-        options = get_ifc_options()
-        export_ifc_file(doc, options, selected_path)
+def export_ifc_file(doc, options):
+    """Export the document to IFC format."""
+    folder_path = select_directory()
+    if folder_path:
+        file_path = folder_path + "\\exported_file.ifc"
+        doc.Export(folder_path, file_path, options)
+        return file_path
     else:
-        TaskDialog.Show("Error", "No directory was selected. Export cancelled.")
+        raise Exception("The folder does not exist.")
 
+def upload_to_ipfs(file_path):
+    """Upload the file to IPFS and return the resulting hash."""
+    try:
+        client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
+        result = client.add(file_path)
+        return result['Hash']
+    except Exception, e:
+        raise Exception("Failed to upload to IPFS: {0}".format(e.Message))
 
-if __name__ == "__main__":
-    main()
+# Main script
+doc = __revit__.ActiveUIDocument.Document
+options = get_ifc_options()
+file_path = export_ifc_file(doc, options)
+ipfs_hash = upload_to_ipfs(file_path)
+TaskDialog.Show('IPFS Hash', 'File uploaded to IPFS with hash: {0}'.format(ipfs_hash))
