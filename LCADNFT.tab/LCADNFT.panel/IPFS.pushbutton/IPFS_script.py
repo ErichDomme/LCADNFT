@@ -1,71 +1,53 @@
 import clr
-import requests
-import os
 
-clr.AddReference("RevitAPI")
-clr.AddReference("RevitAPIUI")
-clr.AddReference("System.Windows.Forms")
+clr.AddReference("System")
+clr.AddReference("System.IO")
+clr.AddReference("System.Net")
 
-from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
-from Autodesk.Revit.UI import TaskDialog
-from System.Windows.Forms import FolderBrowserDialog, DialogResult
+from System import Uri
+from System.Net import HttpWebRequest
+from System.Text import Encoding
+from System.IO import FileStream, FileMode
 
+# Define IPFS API endpoint
+ipfs_api_url = "http://127.0.0.1:5001/api/v0/add"
 
-def export_to_ifc(doc, export_folder, filename):
-    ifc_options = IFCExportOptions()
-    ifc_options.FileVersion = IFCVersion.IFC2x3
-    doc.Export(export_folder, filename, ifc_options)
+# Open the file you want to add to IPFS
+file_path = "path_to_your_file.txt"
+with FileStream(file_path, FileMode.Open) as file_stream:
 
+    # Create an HTTP request
+    request = HttpWebRequest.Create(Uri(ipfs_api_url))
+    request.Method = "POST"
+    request.ContentType = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"  # Adjust boundary as needed
 
-def upload_to_ipfs(filepath):
-    api_url = "http://127.0.0.1:5001/api/v0/add"
+    # Here you'd construct the request body to contain your file's binary data
+    # (this is a bit more complex due to the multipart/form-data format)
+    # This is just a basic example; you might need to modify it based on your exact needs.
+    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+    header = '--{0}\r\nContent-Disposition: form-data; name="file"; filename="{1}"\r\nContent-Type: application/octet-stream\r\n\r\n'.format(
+        boundary, file_path
+    )
+    footer = "\r\n--{0}--\r\n".format(boundary)
 
-    with open(filepath, "rb") as file:
-        response = requests.post(api_url, files={"file": file})
+    # Convert header and footer to bytes
+    header_bytes = Encoding.ASCII.GetBytes(header)
+    footer_bytes = Encoding.ASCII.GetBytes(footer)
 
-    response_json = response.json()
-    ipfs_hash = response_json.get("Hash")
+    request.ContentLength = (
+        header_bytes.Length + file_stream.Length + footer_bytes.Length
+    )
 
-    return ipfs_hash
+    # Write the data to request stream
+    with request.GetRequestStream() as request_stream:
+        request_stream.Write(header_bytes, 0, header_bytes.Length)
+        clr.System.IO.Stream.CopyTo(file_stream, request_stream)
+        request_stream.Write(footer_bytes, 0, footer_bytes.Length)
 
+    # Send the request and read the response
+    response = request.GetResponse()
+    response_stream = response.GetResponseStream()
+    reader = clr.System.IO.StreamReader(response_stream)
+    result = reader.ReadToEnd()
 
-def main():
-    # Show folder browser dialog to get export path
-    folder_browser = FolderBrowserDialog()
-    if folder_browser.ShowDialog() == DialogResult.OK:
-        export_folder = folder_browser.SelectedPath
-        filename = "model.ifc"
-        full_path = os.path.join(export_folder, filename)
-
-        # Check if file with same name already exists
-        if os.path.exists(full_path):
-            TaskDialog.Show(
-                "Warning",
-                "File with the same name already exists. Please use a different name.",
-            )
-            return
-
-        # Export IFC
-        try:
-            active_doc = __revit__.ActiveUIDocument.Document
-            # Start a transaction
-            with Transaction(active_doc, "IFC Export") as t:
-                t.Start()
-                export_to_ifc(
-                    doc=active_doc, export_folder=export_folder, filename=filename
-                )
-                t.Commit()
-            TaskDialog.Show("Success", "IFC Exported Successfully!")
-
-            # Upload to IPFS
-            ipfs_hash = upload_to_ipfs(full_path)
-            TaskDialog.Show(
-                "IPFS", "File uploaded to IPFS with hash: {}".format(ipfs_hash)
-            )
-
-        except Exception as e:
-            TaskDialog.Show("Error", "Error: {}".format(str(e)))
-
-
-# Run main function
-main()
+    print(result)
