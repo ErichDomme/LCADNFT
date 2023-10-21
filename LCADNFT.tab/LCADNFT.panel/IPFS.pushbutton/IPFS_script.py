@@ -13,7 +13,7 @@ from System.IO import FileStream, FileMode
 ipfs_api_url = "http://127.0.0.1:5001/api/v0/add"
 
 # Open the file you want to add to IPFS
-file_path = "path_to_your_file.txt"
+file_path = "C:\Users\erich\Desktop\model.ifc"
 with FileStream(file_path, FileMode.Open) as file_stream:
 
     # Create an HTTP request
