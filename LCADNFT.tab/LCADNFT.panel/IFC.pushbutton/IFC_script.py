@@ -39,21 +39,23 @@ def upload_to_ipfs(file_path):
         response_json = json.loads(response_text)
         return response_json["Hash"]
     except WebException as e:
-        TaskDialog.Show("Error", f"Failed to upload to IPFS: {e.Message}")
+        TaskDialog.Show("Error", "Failed to upload to IPFS: " + e.Message)
         return None
 
 
 # 3. Display hash and copy to clipboard
 def display_hash_and_copy(hash_code):
     # Using pyRevit's forms to display a dialog box
+    message = "File Uploaded Successfully!\n\nIPFS Hash: " + hash_code
     result = script.forms.alert(
-        f"File Uploaded Successfully!\n\nIPFS Hash: {hash_code}",
+        message,
         ok=False,
         yes=True,
         no=True,
         yes_text="Copy to Clipboard",
         no_text="Close",
     )
+
     if result == "Yes":
         script.clipboard.copy(hash_code)
         TaskDialog.Show("Success", "Hash copied to clipboard!")
