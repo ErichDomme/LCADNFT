@@ -1,59 +1,37 @@
-# Import necessary modules
+# Import necessary .NET assemblies
 import clr
-import ipfshttpclient
 
-# Import Revit API
-clr.AddReference('RevitAPI')
-clr.AddReference('RevitAPIUI')
-from Autodesk.Revit.DB import Document, ExporterIFCUtils, IFCExportOptions
-from Autodesk.Revit.DB.Architecture import RoomFilter
-from Autodesk.Revit.UI import TaskDialog
-import System.Windows.Forms as Forms
+clr.AddReference("RevitAPI")
+clr.AddReference("RevitAPIUI")
 
-# Functions
-def select_directory():
-    """
-    Allows the user to select a directory and returns the selected path.
-    Returns None if no path was selected.
-    """
-    dialog = Forms.FolderBrowserDialog()
-    dialog.Description = "Select a Folder"
-    dialog.ShowNewFolderButton = True
-    
-    if dialog.ShowDialog() == Forms.DialogResult.OK:
-        return dialog.SelectedPath
-    return None
+from Autodesk.Revit.DB import *
+from Autodesk.Revit.UI import *
 
-def get_ifc_options():
-    """Set IFC export options."""
-    options = IFCExportOptions()
-    options.FileVersion = IFCExportFileVersion.IFC4
-    options.SpaceBoundaryLevel = 0
-    options.ExportBaseQuantities = True
-    return options
+import System.Windows.Forms as WinForms
 
-def export_ifc_file(doc, options):
-    """Export the document to IFC format."""
-    folder_path = select_directory()
-    if folder_path:
-        file_path = folder_path + "\\exported_file.ifc"
-        doc.Export(folder_path, file_path, options)
-        return file_path
-    else:
-        raise Exception("The folder does not exist.")
+# Function to export IFC
+def export_to_ifc(doc, export_path):
+    ifc_options = IFCExportOptions()
+    ifc_options.FileVersion = IFCVersion.IFC2x3
+    doc.Export(export_path, ".ifc", ifc_options)
 
-def upload_to_ipfs(file_path):
-    """Upload the file to IPFS and return the resulting hash."""
-    try:
-        client = ipfshttpclient.connect('/ip4/127.0.0.1/tcp/5001/http')
-        result = client.add(file_path)
-        return result['Hash']
-    except Exception, e:
-        raise Exception("Failed to upload to IPFS: {0}".format(e.Message))
 
-# Main script
-doc = __revit__.ActiveUIDocument.Document
-options = get_ifc_options()
-file_path = export_ifc_file(doc, options)
-ipfs_hash = upload_to_ipfs(file_path)
-TaskDialog.Show('IPFS Hash', 'File uploaded to IPFS with hash: {0}'.format(ipfs_hash))
+# Main function
+def main():
+    # Show folder browser dialog to get export path
+    folder_browser = WinForms.FolderBrowserDialog()
+    if folder_browser.ShowDialog() == WinForms.DialogResult.OK:
+        export_path = folder_browser.SelectedPath
+        # Ensure path ends with .ifc
+        if not export_path.lower().endswith(".ifc"):
+            export_path += r"\model.ifc"
+        # Export IFC
+        try:
+            export_to_ifc(doc=revit.doc, export_path=export_path)
+            TaskDialog.Show("Success", "IFC Exported Successfully!")
+        except Exception as e:
+            TaskDialog.Show("Error", f"Error exporting IFC: {str(e)}")
+
+
+# Run main function
+main()
