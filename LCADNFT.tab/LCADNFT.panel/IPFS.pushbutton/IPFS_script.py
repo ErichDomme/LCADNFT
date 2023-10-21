@@ -7,7 +7,7 @@ clr.AddReference("RevitAPI")
 clr.AddReference("RevitAPIUI")
 clr.AddReference("System.Windows.Forms")
 clr.AddReference("Microsoft.VisualBasic")
-clr.AddReference('System.Net')
+clr.AddReference("System.Net")
 
 # Imports
 from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
@@ -22,6 +22,7 @@ def export_to_ifc(doc, export_folder, filename):
     ifc_options = IFCExportOptions()
     ifc_options.FileVersion = IFCVersion.IFC2x3
     doc.Export(export_folder, filename, ifc_options)
+
 
 # Function to get filename from user
 def get_filename_from_user(export_folder):
@@ -42,22 +43,24 @@ def get_filename_from_user(export_folder):
         else:
             return filename
 
+
 # Function to upload file to IPFS using Pinata
 def pin_file_to_ipfs(file_path):
     api_endpoint = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     api_key = "93407b953284346d89e2"
     api_secret = "c6153a7e62502c242c7c7415b40bab18fea5dd921457e632a58eab03c194c736"
-    
+
     client = WebClient()
     client.Headers.Add("pinata_api_key", api_key)
     client.Headers.Add("pinata_secret_api_key", api_secret)
-    
+
     try:
         response = client.UploadFile(api_endpoint, file_path)
         response_string = Encoding.UTF8.GetString(response)
         return json.loads(response_string)
     except WebException as e:
         return str(e.Response.GetResponseStream().ReadToEnd())
+
 
 # Main function
 def main():
@@ -79,4 +82,20 @@ def main():
                         doc=active_doc, export_folder=export_folder, filename=filename
                     )
                     t.Commit()
-                Task
+
+                # Upload the file to IPFS
+                response = pin_file_to_ipfs(os.path.join(export_folder, filename))
+                if "IpfsHash" in response:
+                    TaskDialog.Show(
+                        "Success",
+                        f"IFC Exported and uploaded to IPFS with hash: {response['IpfsHash']}",
+                    )
+                else:
+                    TaskDialog.Show("Error", f"Failed to upload to IPFS: {response}")
+
+            except Exception as e:
+                TaskDialog.Show("Error", "Error: {}".format(str(e)))
+
+
+# Run main function
+main()
