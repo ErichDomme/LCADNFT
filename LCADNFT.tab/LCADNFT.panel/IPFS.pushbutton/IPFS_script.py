@@ -19,13 +19,13 @@ def export_to_ifc(doc, export_folder, filename):
 
 def upload_to_ipfs(filepath):
     api_url = "http://127.0.0.1:5001/api/v0/add"
-    
-    with open(filepath, 'rb') as file:
-        response = requests.post(api_url, files={'file': file})
-        
+
+    with open(filepath, "rb") as file:
+        response = requests.post(api_url, files={"file": file})
+
     response_json = response.json()
-    ipfs_hash = response_json.get('Hash')
-    
+    ipfs_hash = response_json.get("Hash")
+
     return ipfs_hash
 
 
@@ -36,10 +36,13 @@ def main():
         export_folder = folder_browser.SelectedPath
         filename = "model.ifc"
         full_path = os.path.join(export_folder, filename)
-        
+
         # Check if file with same name already exists
         if os.path.exists(full_path):
-            TaskDialog.Show("Warning", "File with the same name already exists. Please use a different name.")
+            TaskDialog.Show(
+                "Warning",
+                "File with the same name already exists. Please use a different name.",
+            )
             return
 
         # Export IFC
@@ -53,13 +56,15 @@ def main():
                 )
                 t.Commit()
             TaskDialog.Show("Success", "IFC Exported Successfully!")
-            
+
             # Upload to IPFS
             ipfs_hash = upload_to_ipfs(full_path)
-            TaskDialog.Show("IPFS", f"File uploaded to IPFS with hash: {ipfs_hash}")
-            
+            TaskDialog.Show(
+                "IPFS", "File uploaded to IPFS with hash: {}".format(ipfs_hash)
+            )
+
         except Exception as e:
-            TaskDialog.Show("Error", f"Error: {str(e)}")
+            TaskDialog.Show("Error", "Error: {}".format(str(e)))
 
 
 # Run main function
