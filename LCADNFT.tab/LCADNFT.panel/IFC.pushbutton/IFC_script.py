@@ -23,8 +23,12 @@ def export_ifc_file(doc):
     # Temporary filename
     tmp_file = tempfile.mktemp(suffix=".ifc")
 
-    # Export IFC
-    doc.Export(os.path.dirname(tmp_file), os.path.basename(tmp_file), options)
+    # Use a transaction to perform the export
+    with Transaction(doc, "Export IFC") as t:
+        t.Start()
+        # Export IFC
+        doc.Export(os.path.dirname(tmp_file), os.path.basename(tmp_file), options)
+        t.Commit()
 
     return tmp_file
 
