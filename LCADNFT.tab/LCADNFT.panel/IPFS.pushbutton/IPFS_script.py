@@ -1,53 +1,183 @@
 import clr
+import os
+import json
 
-clr.AddReference("System")
-clr.AddReference("System.IO")
-clr.AddReference("System.Net")
+# .NET references
+clr.AddReference("RevitAPI")
+clr.AddReference("RevitAPIUI")
+clr.AddReference("System.Windows.Forms")
+clr.AddReference("Microsoft.VisualBasic")
+clr.AddReference('System.Net')
 
-from System import Uri
-from System.Net import HttpWebRequest
+# Imports
+from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
+from Autodesk.Revit.UI import TaskDialog
+from System.Windows.Forms import FolderBrowserDialog, DialogResult
+from Microsoft.VisualBasic import Interaction
+from System.Net import WebClient, WebHeaderCollection, WebException
 from System.Text import Encoding
-from System.IO import FileStream, FileMode
 
-# Define IPFS API endpoint
-ipfs_api_url = "http://127.0.0.1:5001/api/v0/add"
+# Function to export IFC
+def export_to_ifc(doc, export_folder, filename):
+    ifc_options = IFCExportOptions()
+    ifc_options.FileVersion = IFCVersion.IFC2x3
+    doc.Export(export_folder, filename, ifc_options)
 
-# Open the file you want to add to IPFS
-file_path = "C:\Users\erich\Desktop\model.ifc"
-with FileStream(file_path, FileMode.Open) as file_stream:
+# Function to get filename from user
+def get_filename_from_user(export_folder):
+    while True:
+        default_filename = "model"
+        prompt_text = "Enter desired filename for the IFC export (without extension):"
+        title = "Filename"
+        filename = Interaction.InputBox(prompt_text, title, default_filename)
+        if not filename:
+            return None  # User pressed cancel
+        complete_path = os.path.join(export_folder, filename + ".ifc")
+        if os.path.exists(complete_path):
+            TaskDialog.Show(
+                "File Exists",
+                "A file with this name already exists. Please choose another name.",
+            )
+            continue
+        else:
+            return filename
 
-    # Create an HTTP request
-    request = HttpWebRequest.Create(Uri(ipfs_api_url))
-    request.Method = "POST"
-    request.ContentType = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"  # Adjust boundary as needed
+# Function to upload file to IPFS using Pinata
+def pin_file_to_ipfs(file_path):
+    api_endpoint = "https://api.pinata.cloud/pinning/pinFileToIPFS"
+    api_key = "93407b953284346d89e2"
+    api_secret = "c6153a7e62502c242c7c7415b40bab18fea5dd921457e632a58eab03c194c736"
+    
+    client = WebClient()
+    client.Headers.Add("pinata_api_key", api_key)
+    client.Headers.Add("pinata_secret_api_key", api_secret)
+    
+    try:
+        response = client.UploadFile(api_endpoint, file_path)
+        response_string = Encoding.UTF8.GetString(response)
+        return json.loads(response_string)
+    except WebException as e:
+        return str(e.Response.GetResponseStream().ReadToEnd())
 
-    # Here you'd construct the request body to contain your file's binary data
-    # (this is a bit more complex due to the multipart/form-data format)
-    # This is just a basic example; you might need to modify it based on your exact needs.
-    boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
-    header = '--{0}\r\nContent-Disposition: form-data; name="file"; filename="{1}"\r\nContent-Type: application/octet-stream\r\n\r\n'.format(
-        boundary, file_path
-    )
-    footer = "\r\n--{0}--\r\n".format(boundary)
+# Main function
+def main():
+    # Show folder browser dialog to get export path
+    folder_browser = FolderBrowserDialog()
+    if folder_browser.ShowDialog() == DialogResult.OK:
+        export_folder = folder_browser.SelectedPath
+        filename = get_filename_from_user(export_folder)
 
-    # Convert header and footer to bytes
-    header_bytes = Encoding.ASCII.GetBytes(header)
-    footer_bytes = Encoding.ASCII.GetBytes(footer)
+        if filename:
+            filename = filename + ".ifc"
+            # Export IFC
+            try:
+                active_doc = __revit__.ActiveUIDocument.Document
+                # Start a transaction
+                with Transaction(active_doc, "IFC Export") as t:
+                    t.Start()
+                    export_to_ifc(
+                        doc=active_doc, export_folder=export_folder, filename=filename
+                    )
+                    t.Commit()
+                Task
 
-    request.ContentLength = (
-        header_bytes.Length + file_stream.Length + footer_bytes.Length
-    )
 
-    # Write the data to request stream
-    with request.GetRequestStream() as request_stream:
-        request_stream.Write(header_bytes, 0, header_bytes.Length)
-        clr.System.IO.Stream.CopyTo(file_stream, request_stream)
-        request_stream.Write(footer_bytes, 0, footer_bytes.Length)
 
-    # Send the request and read the response
-    response = request.GetResponse()
-    response_stream = response.GetResponseStream()
-    reader = clr.System.IO.StreamReader(response_stream)
-    result = reader.ReadToEnd()
 
-    print(result)
+
+
+
+
+
+
+
+
+
+
+# import clr
+# import os
+# import requests
+
+# clr.AddReference("RevitAPI")
+# clr.AddReference("RevitAPIUI")
+# clr.AddReference("System.Windows.Forms")
+# clr.AddReference("Microsoft.VisualBasic")
+
+# from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
+# from Autodesk.Revit.UI import TaskDialog
+# from System.Windows.Forms import FolderBrowserDialog, DialogResult
+# from Microsoft.VisualBasic import Interaction
+
+
+# # Function to export IFC
+# def export_to_ifc(doc, export_folder, filename):
+#     ifc_options = IFCExportOptions()
+#     ifc_options.FileVersion = IFCVersion.IFC2x3
+#     doc.Export(export_folder, filename, ifc_options)
+
+
+# # Function to get filename from user
+# def get_filename_from_user(export_folder):
+#     while True:
+#         default_filename = "model"
+#         prompt_text = "Enter desired filename for the IFC export (without extension):"
+#         title = "Filename"
+#         filename = Interaction.InputBox(prompt_text, title, default_filename)
+#         if not filename:
+#             return None  # User pressed cancel
+#         complete_path = os.path.join(export_folder, filename + ".ifc")
+#         if os.path.exists(complete_path):
+#             TaskDialog.Show(
+#                 "File Exists",
+#                 "A file with this name already exists. Please choose another name.",
+#             )
+#             continue
+#         else:
+#             return filename
+
+
+# def upload_to_ipfs(filepath):
+#     with open(filepath, "rb") as file:
+#         url = "https://YOUR_IPFS_NODE_ADDRESS/api/v0/add"
+#         response = requests.post(url, files={"file": file})
+#         ipfs_hash = response.json()["Hash"]
+#         return ipfs_hash
+
+
+# # Main function
+# def main():
+#     # Show folder browser dialog to get export path
+#     folder_browser = FolderBrowserDialog()
+#     if folder_browser.ShowDialog() == DialogResult.OK:
+#         export_folder = folder_browser.SelectedPath
+#         filename = get_filename_from_user(export_folder)
+
+#         if filename:
+#             filename_with_extension = filename + ".ifc"
+#             # Export IFC
+#             try:
+#                 active_doc = __revit__.ActiveUIDocument.Document
+#                 # Start a transaction
+#                 with Transaction(active_doc, "IFC Export") as t:
+#                     t.Start()
+#                     export_to_ifc(
+#                         doc=active_doc,
+#                         export_folder=export_folder,
+#                         filename=filename_with_extension,
+#                     )
+#                     t.Commit()
+
+#                 # Upload the exported IFC to IPFS
+#                 ipfs_hash = upload_to_ipfs(
+#                     os.path.join(export_folder, filename_with_extension)
+#                 )
+#                 TaskDialog.Show(
+#                     "Success", f"IFC Exported Successfully! IPFS Hash: {ipfs_hash}"
+#                 )
+
+#             except Exception as e:
+#                 TaskDialog.Show("Error", "Error exporting IFC: {}".format(str(e)))
+
+
+# # Run main function
+# main()
