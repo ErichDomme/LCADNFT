@@ -30,7 +30,7 @@ def main():
             export_to_ifc(doc=revit.doc, export_path=export_path)
             TaskDialog.Show("Success", "IFC Exported Successfully!")
         except Exception as e:
-            TaskDialog.Show("Error", f"Error exporting IFC: {str(e)}")
+            TaskDialog.Show("Error", "Error exporting IFC: {}".format(str(e)))
 
 
 # Run main function
