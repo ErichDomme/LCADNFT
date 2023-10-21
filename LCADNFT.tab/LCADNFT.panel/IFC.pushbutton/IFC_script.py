@@ -6,13 +6,55 @@ clr.AddReference("System.Windows.Forms")
 
 from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
 from Autodesk.Revit.UI import TaskDialog
-from System.Windows.Forms import FolderBrowserDialog, DialogResult, InputBox
+from System.Windows.Forms import (
+    FolderBrowserDialog,
+    DialogResult,
+    Form,
+    TextBox,
+    Button,
+    Label,
+)
 
 # Function to export IFC
 def export_to_ifc(doc, export_folder, filename):
     ifc_options = IFCExportOptions()
     ifc_options.FileVersion = IFCVersion.IFC2x3
     doc.Export(export_folder, filename, ifc_options)
+
+
+# Custom input dialog to get filename
+def input_filename_dialog(default_text="model.ifc"):
+    form = Form()
+    form.Width = 300
+    form.Height = 150
+    form.Text = "Input filename"
+
+    label = Label()
+    label.Text = "Enter filename for the IFC export:"
+    label.Width = 280
+    label.Location = Point(10, 10)
+    form.Controls.Add(label)
+
+    textbox = TextBox()
+    textbox.Text = default_text
+    textbox.Width = 280
+    textbox.Location = Point(10, 40)
+    form.Controls.Add(textbox)
+
+    button = Button()
+    button.Text = "OK"
+    button.Width = 100
+    button.Location = Point(190, 70)
+
+    def button_event(sender, event):
+        form.Close()
+
+    button.Click += button_event
+    form.Controls.Add(button)
+
+    form.ShowDialog()
+
+    return textbox.Text
 
 
 # Main function
@@ -23,9 +65,7 @@ def main():
         export_folder = folder_browser.SelectedPath
 
         # Ask user for filename
-        filename = InputBox.Show(
-            "Enter filename for the IFC export:", "IFC Filename", "model.ifc"
-        )
+        filename = input_filename_dialog()
 
         # Check if filename ends with ".ifc". If not, append it.
         if not filename.endswith(".ifc"):
