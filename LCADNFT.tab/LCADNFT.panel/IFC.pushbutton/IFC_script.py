@@ -19,7 +19,7 @@ def export_to_ifc(doc, export_folder, filename):
 
 # Function to get filename from user
 def get_filename_from_user():
-    default_filename = "model"
+    default_filename = "Model"
     prompt_text = "Enter desired filename for the IFC export (without extension):"
     title = "Filename"
     filename = Interaction.InputBox(prompt_text, title, default_filename)
