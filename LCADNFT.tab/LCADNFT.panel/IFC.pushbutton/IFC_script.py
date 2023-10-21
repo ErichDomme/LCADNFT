@@ -1,67 +1,59 @@
 import clr
-import os
-import tempfile
-import json
-import System
-from System.Net import WebClient, WebException
 
-# Importing required Revit and .NET assemblies
 clr.AddReference("RevitAPI")
 clr.AddReference("RevitAPIUI")
-clr.AddReference("System.Windows.Forms")
 from Autodesk.Revit.DB import *
-from Autodesk.Revit.UI import TaskDialog
-import System.Windows.Forms
+from Autodesk.Revit.DB.Architecture import *
+from Autodesk.Revit.UI import *
 
-# Define IFC export options
+import System
+from System.Collections.Generic import List
+from System.Windows.Forms import FolderBrowserDialog
+
+uidoc = __revit__.ActiveUIDocument
+doc = __revit__.ActiveUIDocument.Document
+
+
+def select_directory():
+    """
+    Allows the user to select a directory and returns the selected path.
+    Returns None if no path was selected.
+    """
+    dialog = FolderBrowserDialog()
+    dialog.Description = "Select a Folder"
+    dialog.ShowNewFolderButton = True
+
+    if dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK:
+        return dialog.SelectedPath
+    return None
+
+
 def get_ifc_options():
-    # Set up IFC export options
+    # Example placeholder for IFC options setup
     options = IFCExportOptions()
-    options.FileVersion = IFCVersion.IFC2x3
-    options.AddOption("TessellationLevelOfDetail", "0.5")
-    options.AddOption("SpaceBoundaries", "1")
-    # You can add other options if necessary
-
+    # options.SpaceBoundaries = 2  # This was previously causing an error
     return options
 
 
-# Export current document to IFC
-def export_ifc_file(doc, ifc_path):
-    options = get_ifc_options()
-    doc.Export(ifc_path, doc.Title, options)
+def export_ifc_file(doc, options, selected_path):
+    if not selected_path:
+        raise Exception("No directory selected for export.")
 
+    # Construct the full file path using the selected directory
+    file_path = System.IO.Path.Combine(selected_path, "ExportedIFC.ifc")
 
-# Upload IFC file to IPFS
-def upload_to_ipfs(ifc_file):
-    gateway_url = "http://127.0.0.1:5001/api/v0/add"
-    with WebClient() as client:
-        response = client.UploadFile(gateway_url, ifc_file)
-        response_string = System.Text.Encoding.ASCII.GetString(response)
-        response_json = json.loads(response_string)
-        return response_json["Hash"]
-
-
-# Show the IPFS hash and copy it to clipboard
-def display_hash_and_copy(hash_code):
-    message = "File Uploaded Successfully!\n\nIPFS Hash: " + hash_code
-    TaskDialog.Show("Success", message)
-    System.Windows.Forms.Clipboard.SetText(hash_code)
+    # Execute export (replace with your export logic if different)
+    doc.Export(selected_path, file_path, options)
 
 
 def main():
-    uidoc = __revit__.ActiveUIDocument
-    doc = uidoc.Document
-    with Transaction(doc, "Export IFC"):
-        temp_file_path = tempfile.mktemp(suffix=".ifc")
-        export_ifc_file(doc, temp_file_path)
-    try:
-        ipfs_hash = upload_to_ipfs(temp_file_path)
-        display_hash_and_copy(ipfs_hash)
-    except WebException as e:
-        TaskDialog.Show("Error", "Failed to upload to IPFS: {}".format(e.Message))
-    finally:
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+    selected_path = select_directory()
+
+    if selected_path:
+        options = get_ifc_options()
+        export_ifc_file(doc, options, selected_path)
+    else:
+        TaskDialog.Show("Error", "No directory was selected. Export cancelled.")
 
 
 if __name__ == "__main__":
