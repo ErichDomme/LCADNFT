@@ -8,43 +8,38 @@ from System.Net import WebClient, WebException
 # Importing required Revit and .NET assemblies
 clr.AddReference("RevitAPI")
 clr.AddReference("RevitAPIUI")
+clr.AddReference("System.Windows.Forms")
 from Autodesk.Revit.DB import *
 from Autodesk.Revit.UI import TaskDialog
+import System.Windows.Forms
 
-# 1. Generate IFC File
-def export_ifc_file(doc):
-    # Define the IFC options
+# Define IFC export options
+def get_ifc_options():
     options = IFCExportOptions()
-    options.AddOption("ExportBaseQuantities", "true")
-
-    # Temporary filename
-    tmp_file = tempfile.mktemp(suffix=".ifc")
-
-    # Use a transaction to perform the export
-    with Transaction(doc, "Export IFC") as t:
-        t.Start()
-        # Export IFC
-        doc.Export(os.path.dirname(tmp_file), os.path.basename(tmp_file), options)
-        t.Commit()
-
-    return tmp_file
+    options.FileVersion = IFCVersion.IFC2x3CV2
+    options.SpaceBoundaries = 0
+    options.ExportBaseQuantities = True
+    options.IncludeSiteElevation = True
+    return options
 
 
-# 2. Upload to IPFS using IPFS's HTTP API
-def upload_to_ipfs(file_path):
-    client = WebClient()
-    ipfs_api_url = "http://127.0.0.1:5001/api/v0/add"
-    try:
-        response_bytes = client.UploadFile(ipfs_api_url, file_path)
-        response_text = System.Text.Encoding.UTF8.GetString(response_bytes)
-        response_json = json.loads(response_text)
+# Export current document to IFC
+def export_ifc_file(doc, ifc_path):
+    options = get_ifc_options()
+    doc.Export(ifc_path, doc.Title, options)
+
+
+# Upload IFC file to IPFS
+def upload_to_ipfs(ifc_file):
+    gateway_url = "http://127.0.0.1:5001/api/v0/add"
+    with WebClient() as client:
+        response = client.UploadFile(gateway_url, ifc_file)
+        response_string = System.Text.Encoding.ASCII.GetString(response)
+        response_json = json.loads(response_string)
         return response_json["Hash"]
-    except WebException as e:
-        TaskDialog.Show("Error", "Failed to upload to IPFS: " + e.Message)
-        return None
 
 
-# 3. Display hash and copy to clipboard
+# Show the IPFS hash and copy it to clipboard
 def display_hash_and_copy(hash_code):
     message = "File Uploaded Successfully!\n\nIPFS Hash: " + hash_code
     TaskDialog.Show("Success", message)
@@ -52,22 +47,20 @@ def display_hash_and_copy(hash_code):
 
 
 def main():
-    # Get the current document
     uidoc = __revit__.ActiveUIDocument
     doc = uidoc.Document
-
-    # Export IFC
-    ifc_file_path = export_ifc_file(doc)
-
-    # Show an interim message
-    TaskDialog.Show("Info", "IFC exported. Uploading to IPFS...")
-
-    # Upload to IPFS
-    ipfs_hash = upload_to_ipfs(ifc_file_path)
-
-    # If successful, display the IPFS hash and provide the option to copy
-    if ipfs_hash:
+    with Transaction(doc, "Export IFC"):
+        temp_file_path = tempfile.mktemp(suffix=".ifc")
+        export_ifc_file(doc, temp_file_path)
+    try:
+        ipfs_hash = upload_to_ipfs(temp_file_path)
         display_hash_and_copy(ipfs_hash)
+    except WebException as e:
+        TaskDialog.Show("Error", f"Failed to upload to IPFS: {e.Message}")
+    finally:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
 
 
-main()
+if __name__ == "__main__":
+    main()
