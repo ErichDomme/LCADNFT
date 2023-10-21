@@ -56,7 +56,7 @@ def main():
         ipfs_hash = upload_to_ipfs(temp_file_path)
         display_hash_and_copy(ipfs_hash)
     except WebException as e:
-        TaskDialog.Show("Error", f"Failed to upload to IPFS: {e.Message}")
+        TaskDialog.Show("Error", "Failed to upload to IPFS: {}".format(e.Message))
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
