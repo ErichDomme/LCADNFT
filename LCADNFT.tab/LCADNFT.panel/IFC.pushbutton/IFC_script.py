@@ -1,8 +1,13 @@
 import clr
 
+
+from System.Windows.Forms import SaveFileDialog, DialogResult
+from System.Drawing import Point
+
 clr.AddReference("RevitAPI")
 clr.AddReference("RevitAPIUI")
 clr.AddReference("System.Windows.Forms")
+clr.AddReference("System.Drawing")
 
 from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
 from Autodesk.Revit.UI import TaskDialog
@@ -14,7 +19,7 @@ from System.Windows.Forms import (
     Button,
     Label,
 )
-from System.Windows.Forms import Point
+from System.Drawing import Point
 
 
 # Function to export IFC
