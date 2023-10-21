@@ -3,10 +3,12 @@ import clr
 clr.AddReference("RevitAPI")
 clr.AddReference("RevitAPIUI")
 clr.AddReference("System.Windows.Forms")
+clr.AddReference("Microsoft.VisualBasic")
 
 from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
 from Autodesk.Revit.UI import TaskDialog
 from System.Windows.Forms import FolderBrowserDialog, DialogResult
+from Microsoft.VisualBasic import Interaction
 
 # Function to export IFC
 def export_to_ifc(doc, export_folder, filename):
@@ -14,18 +16,15 @@ def export_to_ifc(doc, export_folder, filename):
     ifc_options.FileVersion = IFCVersion.IFC2x3
     doc.Export(export_folder, filename, ifc_options)
 
+
 # Function to get filename from user
 def get_filename_from_user():
-    td = TaskDialog("Filename")
-    td.MainInstruction = "Enter desired filename for the IFC export"
-    td.MainContent = "Please provide a name without extension (.ifc will be added):"
-    td.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Proceed with export")
-    td.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Cancel export")
+    default_filename = "model"
+    prompt_text = "Enter desired filename for the IFC export (without extension):"
+    title = "Filename"
+    filename = Interaction.InputBox(prompt_text, title, default_filename)
+    return filename
 
-    res = td.Show()
-    if res == TaskDialogResult.CommandLink1:
-        return td.CommandLinkText
-    return None
 
 # Main function
 def main():
@@ -35,7 +34,7 @@ def main():
         export_folder = folder_browser.SelectedPath
         filename = get_filename_from_user()
 
-        if filename is not None:
+        if filename:
             filename = filename + ".ifc"
             # Export IFC
             try:
@@ -50,6 +49,7 @@ def main():
                 TaskDialog.Show("Success", "IFC Exported Successfully!")
             except Exception as e:
                 TaskDialog.Show("Error", "Error exporting IFC: {}".format(str(e)))
+
 
 # Run main function
 main()
