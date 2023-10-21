@@ -15,11 +15,13 @@ import System.Windows.Forms
 
 # Define IFC export options
 def get_ifc_options():
+    # Set up IFC export options
     options = IFCExportOptions()
-    options.FileVersion = IFCVersion.IFC2x3CV2
-    options.SpaceBoundaries = 0
-    options.ExportBaseQuantities = True
-    options.IncludeSiteElevation = True
+    options.FileVersion = IFCVersion.IFC2x3
+    options.AddOption("TessellationLevelOfDetail", "0.5")
+    options.AddOption("SpaceBoundaries", "1")
+    # You can add other options if necessary
+
     return options
 
 
