@@ -27,7 +27,8 @@ def main():
             export_path += r"\model.ifc"
         # Export IFC
         try:
-            export_to_ifc(doc=revit.doc, export_path=export_path)
+            active_doc = __revit__.ActiveUIDocument.Document
+            export_to_ifc(doc=active_doc, export_path=export_path)
             TaskDialog.Show("Success", "IFC Exported Successfully!")
         except Exception as e:
             TaskDialog.Show("Error", "Error exporting IFC: {}".format(str(e)))
