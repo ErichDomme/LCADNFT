@@ -2,7 +2,8 @@ layout:
   - Step One
   - Step Two
   - -----
-  - IFC
-  - IPFS
+  - EXPORT IFC
+  - UPLOAD TO IPFS
+  - ALL IN ONE
   - -----
   - Testing
