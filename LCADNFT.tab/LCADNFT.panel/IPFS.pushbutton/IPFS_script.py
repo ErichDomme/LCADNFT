@@ -69,6 +69,26 @@ def display_and_copy_hash(ipfs_hash):
     form.ShowDialog()
 
 
+# Function to get filename from user
+def get_filename_from_user(export_folder):
+    while True:
+        default_filename = "model"
+        prompt_text = "Enter desired filename for the IFC export (without extension):"
+        title = "Filename"
+        filename = Interaction.InputBox(prompt_text, title, default_filename)
+        if not filename:
+            return None  # User pressed cancel
+        complete_path = os.path.join(export_folder, filename + ".ifc")
+        if os.path.exists(complete_path):
+            TaskDialog.Show(
+                "File Exists",
+                "A file with this name already exists. Please choose another name.",
+            )
+            continue
+        else:
+            return filename
+
+
 # Main function
 def main():
     folder_browser = FolderBrowserDialog()
