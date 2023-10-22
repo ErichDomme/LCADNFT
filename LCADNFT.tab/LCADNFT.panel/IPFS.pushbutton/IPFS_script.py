@@ -88,10 +88,11 @@ def main():
                 if "IpfsHash" in response:
                     TaskDialog.Show(
                         "Success",
-                        f"IFC Exported and uploaded to IPFS with hash: {response['IpfsHash']}",
+                        "IFC Exported and uploaded to IPFS with hash: %s"
+                        % response["IpfsHash"],
                     )
                 else:
-                    TaskDialog.Show("Error", f"Failed to upload to IPFS: {response}")
+                    TaskDialog.Show("Error", "Failed to upload to IPFS: %s" % response)
 
             except Exception as e:
                 TaskDialog.Show("Error", "Error: {}".format(str(e)))
