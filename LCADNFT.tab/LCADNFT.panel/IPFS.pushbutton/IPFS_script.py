@@ -91,7 +91,7 @@ def main():
                         "IFC Exported and uploaded to IPFS with hash: %s"
                         % response["IpfsHash"],
                     )
-                    print(response)
+                    print(response["IpfsHash"])
                 else:
                     TaskDialog.Show("Error", "Failed to upload to IPFS: %s" % response)
 
