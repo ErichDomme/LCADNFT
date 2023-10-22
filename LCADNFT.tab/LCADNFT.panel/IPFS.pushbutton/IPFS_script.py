@@ -12,7 +12,13 @@ clr.AddReference("Microsoft.VisualBasic")
 # Import required classes from .NET
 from Autodesk.Revit.DB import IFCExportOptions, IFCVersion, Transaction
 from Autodesk.Revit.UI import TaskDialog
-from System.Windows.Forms import Form, TextBox, Button, DialogResult
+from System.Windows.Forms import (
+    Form,
+    TextBox,
+    Button,
+    DialogResult,
+    FolderBrowserDialog,
+)
 from Microsoft.VisualBasic import Interaction
 from System.Net import WebClient, WebException
 from System.Text import Encoding
@@ -21,8 +27,8 @@ from System.Text import Encoding
 def upload_to_ipfs(filename):
     url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
     headers = {
-        "pinata_api_key": "YOUR_PINATA_API_KEY",
-        "pinata_secret_api_key": "YOUR_PINATA_SECRET_KEY",
+        "pinata_api_key": "93407b953284346d89e2",
+        "pinata_secret_api_key": "c6153a7e62502c242c7c7415b40bab18fea5dd921457e632a58eab03c194c736",
     }
 
     client = WebClient()
