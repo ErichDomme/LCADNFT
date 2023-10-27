@@ -101,6 +101,7 @@ def main():
                         "IFC Exported and uploaded to IPFS with hash: %s"
                         % response["IpfsHash"],
                     )
+                    print(response["IpfsHash"])
 
                     if not user_wants_local_copy():
                         try:
